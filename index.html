@@ -31,15 +31,19 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h1>Ace</h1>
+        <h1>Anorm for Cypher Embedded!</h1>
 
-<p>Ace is a copy of play!s data access layer <strong>Anorm</strong>. Since Anorm uses plain SQL Ace uses plain Cypher to interact with the database. Anorm's API has been adapted to fit the needs of Neo4j developers. It now provides an API to parse and transform Neo4j execution results.</p>
+<p>The <a href="http://www.playframework.org/">play!</a> framework includes a simple data access layer called <a href="http://www.playframework.org/documentation/2.0.4/ScalaAnorm">Anorm</a>. It uses plain SQL to interact with the database and provides an API to parse and transform the resulting datasets.
+Some libraries exist to transfer this concept to the world of <a href="http://www.neo4j.org/">Neo4j</a>. The <a href="https://github.com/FaKod/neo4j-scala/">Neo4j Scala wrapper</a> has introduced basic Cypher query support and <a href="http://anormcypher.org/">AnormCypher</a> provides a Anorm-like API purely for REST.</p>
+
+<p>However, if you want to use Neo4j embedded in your applications you will be in need of another library. <strong>Ace</strong> (i.e. <strong>A</strong>norm for <strong>C</strong>ypher <strong>E</strong>mbedded) closes this gap and provides a data access layer that uses plain Cypher to interact with the database. Ace (much like AnormCypher) is modeled after Anorm for play! and it's API will look extremly similar.
+If you have worked with Anorm before, you will find Ace very easy to understand and work with.</p>
 
 <h2>Executing Cypher queries</h2>
 
-<p>To start you need to learn how to execute Cypher queries.</p>
+<p>To start you need to learn how to execute simple Cypher queries.</p>
 
-<p>First, import <code>org.ace._</code>, and then simply use the <code>Cypher</code> object to create queries. You need a <code>GraphDatabaseService</code> to run a query:</p>
+<p>First, import <code>org.ace._</code>, and then simply use the <code>Cypher</code> object to create queries. You need to provide an implicit <code>GraphDatabaseService</code> to run a query:</p>
 
 <div class="highlight"><pre><span class="k">import</span> <span class="nn">org.ace._</span>
 
@@ -48,9 +52,9 @@
 <span class="o">}</span> 
 </pre></div>
 
-<p>The <code>execute()</code> method returns a Boolean value indicating whether the execution was successful.</p>
+<p>The <code>execute()</code> method returns a boolean value indicating whether the execution was successful.</p>
 
-<p>To execute an update, you can use <code>executeUpdate()</code>, which returns a tuple containing:</p>
+<p>To execute an update, you can use <code>executeUpdate()</code>, which returns a 5-tuple containing:</p>
 
 <ol>
 <li>The number of nodes created.</li>
@@ -89,7 +93,7 @@
 
 <p>The first way to access the results of a select query is to use the Stream API.</p>
 
-<p>When you call <code>apply()</code> on any Cypher statement, you will receive a lazy <code>Stream</code> of <code>Row</code> instances, where each row can be seen as a dictionary:</p>
+<p>When you call <code>apply()</code> on any Cypher statement, you will receive a <code>Stream</code> of <code>Row</code> instances, where each row can be seen as a dictionary:</p>
 
 <div class="highlight"><pre><span class="c1">// Create a Cypher query</span>
 <span class="k">val</span> <span class="n">selectQuery</span> <span class="k">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) RETURN n.name, n.value"</span><span class="o">)</span>
@@ -184,18 +188,36 @@
 
 <h3>Getting a single optional result</h3>
 
-<p>Let's say you want to retrieve a value from a query that might return null. We'll use the singleOpt parser :</p>
+<p>Let's say you want to retrieve a value from a query that might return null. We'll use the singleOpt parser:</p>
 
 <div class="highlight"><pre><span class="k">val</span> <span class="n">countryId</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(*) WHERE n.type! = 'Country' AND n.country = 'France' RETURN ID(n)"</span><span class="o">).</span><span class="n">as</span><span class="o">(</span><span class="n">scalar</span><span class="o">[</span><span class="kt">Long</span><span class="o">].</span><span class="n">singleOpt</span><span class="o">)</span>
 </pre></div>
 
-<h3>Getting a more complex result</h3>
-
-<p>For a description on how to write a more complicated parser please refer to the corresponding play! Anorm section. The procedure is equivalent.</p>
-
 <h2>Handling Neo4j types</h2>
 
-<p>Todo</p>
+<p>The following parsers will retrieve Neo4j nodes and relationships from a query:</p>
+
+<div class="highlight"><pre><span class="k">val</span> <span class="n">node</span><span class="k">:</span> <span class="kt">org.neo4j.graphdb.Node</span> <span class="o">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) RETURN n"</span><span class="o">).</span><span class="n">as</span><span class="o">(</span><span class="n">node</span><span class="o">(</span><span class="s">"n"</span><span class="o">).</span><span class="n">single</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">rels</span><span class="k">:</span> <span class="kt">org.neo4j.graphdb.Relationship</span> <span class="o">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) MATCH n-[r]-&gt;() RETURN r"</span><span class="o">).</span><span class="n">as</span><span class="o">(</span><span class="n">relationship</span><span class="o">(</span><span class="s">"r"</span><span class="o">)</span> <span class="o">*)</span>
+</pre></div>
+
+<p>If you need to retrieve Cypher paths, you can use the <code>path</code> parser. It will result in a <code>Seq[org.neo4j.graphdb.PropertyContainer]</code> containing all nodes and relationships along the given path. These will usually emerge in alternate order.</p>
+
+<div class="highlight"><pre><span class="k">val</span> <span class="n">path</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">org.neo4j.graphdb.PropertyContainer</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) MATCH p=n-[r]-m RETURN p"</span><span class="o">).</span><span class="n">as</span><span class="o">(</span><span class="n">path</span><span class="o">(</span><span class="s">"p"</span><span class="o">)</span> <span class="o">*)</span>
+</pre></div>
+
+<h1>References</h1>
+
+<ul>
+<li>
+<a href="http://www.playframework.org/documentation/2.0.4/ScalaAnorm">Anorm</a> - simple SQL data access</li>
+<li>
+<a href="http://anormcypher.org/">AnormCypher</a> - a Neo4j library purely for REST</li>
+<li>
+<a href="http://www.playframework.org/">Play!</a> - a framework for web applications with Java &amp; Scala</li>
+<li>
+<a href="http://www.neo4j.org/">Neo4j</a> - an open-source, high-performance, enterprise-grade NOSQL graph database</li>
+</ul>
       </section>
     </div>
 
