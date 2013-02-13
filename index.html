@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Ace : " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Ace</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/flatmap/ace">View on GitHub</a>
+
+          <h1 id="project_title">Ace</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/flatmap/ace/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/flatmap/ace/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Ace</h1>
+
+<p>Ace is a copy of play!s data access layer <strong>Anorm</strong>. Since Anorm uses plain SQL Ace uses plain Cypher to interact with the database. Anorm's API has been adapted to fit the needs of Neo4j developers. It now provides an API to parse and transform Neo4j execution results.</p>
+
+<h2>Executing Cypher queries</h2>
+
+<p>To start you need to learn how to execute Cypher queries.</p>
+
+<p>First, import <code>org.ace._</code>, and then simply use the <code>Cypher</code> object to create queries. You need a <code>GraphDatabaseService</code> to run a query:</p>
+
+<div class="highlight"><pre><span class="k">import</span> <span class="nn">org.ace._</span>
+
+<span class="nc">Neo4j</span><span class="o">.</span><span class="n">withTx</span> <span class="o">{</span> <span class="k">implicit</span> <span class="n">service</span> <span class="k">=&gt;</span>
+  <span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) RETURN n"</span><span class="o">).</span><span class="n">execute</span><span class="o">()</span>    
+<span class="o">}</span> 
+</pre></div>
+
+<p>The <code>execute()</code> method returns a Boolean value indicating whether the execution was successful.</p>
+
+<p>To execute an update, you can use <code>executeUpdate()</code>, which returns a tuple containing:</p>
+
+<ol>
+<li>The number of nodes created.</li>
+<li>The number of relationships created.</li>
+<li>The number of properties set.</li>
+<li>The number of deleted nodes.</li>
+<li>The number of deleted relationships.</li>
+</ol><div class="highlight"><pre><span class="k">val</span> <span class="o">(</span><span class="n">nodesCreated</span><span class="o">,</span> <span class="n">relsCreated</span><span class="o">,</span> <span class="n">propsSet</span><span class="o">,</span> <span class="n">nodesDeleted</span><span class="o">,</span> <span class="n">relsDeleted</span><span class="o">)</span> <span class="k">=</span>
+  <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) MATCH n-[r]-() DELETE n, r"</span><span class="o">).</span><span class="n">executeUpdate</span><span class="o">()</span>
+</pre></div>
+
+<p>Since Scala supports multi-line strings, feel free to use them for complex Cypher statements:</p>
+
+<div class="highlight"><pre><span class="k">val</span> <span class="n">cypherQuery</span> <span class="k">=</span> <span class="nc">Cypher</span><span class="o">(</span>
+  <span class="s">"""</span>
+<span class="s">    START n=node(0)</span>
+<span class="s">    MATCH (n)--(x)</span>
+<span class="s">    RETURN x</span>
+<span class="s">  """</span>
+<span class="o">)</span>
+</pre></div>
+
+<p>Cypher supports querying with parameters. If your Cypher query needs dynamic parameters, you can assign them as follows:</p>
+
+<div class="highlight"><pre><span class="nc">Cypher</span><span class="o">(</span>
+  <span class="s">"""</span>
+<span class="s">    START n=node(0,1,2)</span>
+<span class="s">    RETURN n</span>
+<span class="s">    SKIP {s}</span>
+<span class="s">    LIMIT {l}</span>
+<span class="s">  """</span>
+<span class="o">).</span><span class="n">on</span><span class="o">(</span><span class="s">"s"</span> <span class="o">-&gt;</span> <span class="mi">1</span><span class="o">,</span> <span class="s">"l"</span> <span class="o">-&gt;</span> <span class="mi">1</span><span class="o">)</span>
+</pre></div>
+
+<h2>Retrieving data using the Stream API</h2>
+
+<p>The first way to access the results of a select query is to use the Stream API.</p>
+
+<p>When you call <code>apply()</code> on any Cypher statement, you will receive a lazy <code>Stream</code> of <code>Row</code> instances, where each row can be seen as a dictionary:</p>
+
+<div class="highlight"><pre><span class="c1">// Create a Cypher query</span>
+<span class="k">val</span> <span class="n">selectQuery</span> <span class="k">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) RETURN n.name, n.value"</span><span class="o">)</span>
+
+<span class="c1">// Transform the resulting Stream[Row] to a List[(String,String)]</span>
+<span class="k">val</span> <span class="n">selection</span> <span class="k">=</span> <span class="n">selectQuery</span><span class="o">().</span><span class="n">map</span><span class="o">(</span><span class="n">row</span> <span class="k">=&gt;</span> 
+  <span class="n">row</span><span class="o">[</span><span class="kt">String</span><span class="o">](</span><span class="s">"n.name"</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">row</span><span class="o">[</span><span class="kt">String</span><span class="o">](</span><span class="s">"n.value"</span><span class="o">)</span>
+<span class="o">).</span><span class="n">toList</span>
+</pre></div>
+
+<p>In the following example we will count the number of connected nodes from the start node, so the result set will be a single row with a single column:</p>
+
+<div class="highlight"><pre><span class="c1">// First retrieve the first row</span>
+<span class="k">val</span> <span class="n">firstRow</span> <span class="k">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(2) MATCH (n)--&gt;(x) RETURN count(x) AS c"</span><span class="o">).</span><span class="n">apply</span><span class="o">().</span><span class="n">head</span>
+
+<span class="c1">// Next get the content of the 'c' column as Long</span>
+<span class="k">val</span> <span class="n">nodeCount</span> <span class="k">=</span> <span class="n">firstRow</span><span class="o">[</span><span class="kt">Long</span><span class="o">](</span><span class="s">"c"</span><span class="o">)</span>
+</pre></div>
+
+<h2>Using Pattern Matching</h2>
+
+<p>You can also use Pattern Matching to match and extract the <code>Row</code> content. In this case the column name doesn’t matter. Only the order and the type of the parameters is used to match.</p>
+
+<p>The following example transforms each row to the correct Scala type:</p>
+
+<div class="highlight"><pre><span class="k">case</span> <span class="k">class</span> <span class="nc">SmallCountry</span><span class="o">(</span><span class="n">name</span><span class="k">:</span><span class="kt">String</span><span class="o">)</span> 
+<span class="k">case</span> <span class="k">class</span> <span class="nc">BigCountry</span><span class="o">(</span><span class="n">name</span><span class="k">:</span><span class="kt">String</span><span class="o">)</span> 
+<span class="k">case</span> <span class="k">class</span> <span class="nc">France</span>
+
+<span class="k">val</span> <span class="n">countries</span> <span class="k">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(*) WHERE n.type! = 'Country' RETURN n.name as name, n.population as pop"</span><span class="o">)().</span><span class="n">collect</span> <span class="o">{</span>
+  <span class="k">case</span> <span class="nc">Row</span><span class="o">(</span><span class="s">"France"</span><span class="o">,</span> <span class="k">_</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">France</span><span class="o">()</span>
+  <span class="k">case</span> <span class="nc">Row</span><span class="o">(</span><span class="n">name</span><span class="k">:</span><span class="kt">String</span><span class="o">,</span> <span class="n">pop</span><span class="k">:</span><span class="kt">Int</span><span class="o">)</span> <span class="k">if</span><span class="o">(</span><span class="n">pop</span> <span class="o">&gt;</span> <span class="mi">1000000</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">BigCountry</span><span class="o">(</span><span class="n">name</span><span class="o">)</span>
+  <span class="k">case</span> <span class="nc">Row</span><span class="o">(</span><span class="n">name</span><span class="k">:</span><span class="kt">String</span><span class="o">,</span> <span class="k">_</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">SmallCountry</span><span class="o">(</span><span class="n">name</span><span class="o">)</span>      
+<span class="o">}</span>
+</pre></div>
+
+<p>Note that since <code>collect(…)</code> ignores the cases where the partial function isn’t defined, it allows your code to safely ignore rows that you don’t expect.</p>
+
+<h2>Dealing with Nullable columns</h2>
+
+<p>If a column can contain <code>Null</code> values in the database schema, you need to manipulate it as an <code>Option</code> type.</p>
+
+<p>For example, the <code>indepYear</code> of the <code>Country</code> table is nullable, so you need to match it as <code>Option[Int]</code>:</p>
+
+<div class="highlight"><pre><span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(*) WHERE n.type! = 'Country' RETURN n.name AS name, n.indepYear? AS year"</span><span class="o">)().</span><span class="n">collect</span> <span class="o">{</span>
+  <span class="k">case</span> <span class="nc">Row</span><span class="o">(</span><span class="n">name</span><span class="k">:</span><span class="kt">String</span><span class="o">,</span> <span class="nc">Some</span><span class="o">(</span><span class="n">year</span><span class="k">:</span><span class="kt">Int</span><span class="o">))</span> <span class="k">=&gt;</span> <span class="n">name</span> <span class="o">-&gt;</span> <span class="n">year</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>If you try to match this column as <code>Int</code> it won’t be able to parse <code>Null</code> values. Suppose you try to retrieve the column content as <code>Int</code> directly from the dictionary:</p>
+
+<div class="highlight"><pre><span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(*) WHERE n.type! = 'Country' RETURN n.name AS name, n.indepYear? AS year"</span><span class="o">)().</span><span class="n">map</span> <span class="o">{</span> <span class="n">row</span> <span class="k">=&gt;</span>
+  <span class="n">row</span><span class="o">[</span><span class="kt">String</span><span class="o">](</span><span class="s">"name"</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">row</span><span class="o">[</span><span class="kt">Int</span><span class="o">](</span><span class="s">"year"</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>This will produce an <code>UnexpectedNullableFound(year)</code> exception if it encounters a null value, so you need to map it properly to an <code>Option[Int]</code>, as:</p>
+
+<div class="highlight"><pre><span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(*) WHERE n.type! = 'Country' RETURN n.name AS name, n.indepYear? AS year"</span><span class="o">)().</span><span class="n">map</span> <span class="o">{</span> <span class="n">row</span> <span class="k">=&gt;</span>
+  <span class="n">row</span><span class="o">[</span><span class="kt">String</span><span class="o">](</span><span class="s">"name"</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">row</span><span class="o">[</span><span class="kt">Option</span><span class="o">[</span><span class="kt">Int</span><span class="o">]](</span><span class="s">"year"</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>This is also true for the parser API, as we will see next.</p>
+
+<h2>Using the Parser API</h2>
+
+<p>You can use the parser API to create generic and reusable parsers that can parse the result of any select query.</p>
+
+<blockquote>
+<p><strong>Note:</strong> This is really useful, since most queries in a web application will return similar data sets. For example, if you have defined a parser able to parse a <code>Country</code> from a result set, and another <code>Language</code> parser, you can then easily compose them to parse both Country and Language from a join query.</p>
+
+<p>First you need to <code>import org.ace.CypherParser._</code></p>
+</blockquote>
+
+<h3>Getting a single result</h3>
+
+<p>First you need a <code>RowParser</code>, i.e. a parser able to parse one row to a Scala value. For example we can define a parser to transform a single column result set row, to a Scala <code>Long</code>:</p>
+
+<div class="highlight"><pre><span class="k">val</span> <span class="n">rowParser</span> <span class="k">=</span> <span class="n">scalar</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span>
+</pre></div>
+
+<p>Then we have to transform it into a <code>ResultSetParser</code>. Here we will create a parser that parse a single row:</p>
+
+<div class="highlight"><pre><span class="k">val</span> <span class="n">rsParser</span> <span class="k">=</span> <span class="n">scalar</span><span class="o">[</span><span class="kt">Long</span><span class="o">].</span><span class="n">single</span>
+</pre></div>
+
+<p>So this parser will parse a result set to return a <code>Long</code>. It is useful to parse to result produced by a simple Cypher <code>COUNT</code> query:</p>
+
+<div class="highlight"><pre><span class="k">val</span> <span class="n">count</span><span class="k">:</span> <span class="kt">Long</span> <span class="o">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(*) return COUNT(n)"</span><span class="o">).</span><span class="n">as</span><span class="o">(</span><span class="n">scalar</span><span class="o">[</span><span class="kt">Long</span><span class="o">].</span><span class="n">single</span><span class="o">)</span>
+</pre></div>
+
+<h3>Getting a single optional result</h3>
+
+<p>Let's say you want to retrieve a value from a query that might return null. We'll use the singleOpt parser :</p>
+
+<div class="highlight"><pre><span class="k">val</span> <span class="n">countryId</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(*) WHERE n.type! = 'Country' AND n.country = 'France' RETURN ID(n)"</span><span class="o">).</span><span class="n">as</span><span class="o">(</span><span class="n">scalar</span><span class="o">[</span><span class="kt">Long</span><span class="o">].</span><span class="n">singleOpt</span><span class="o">)</span>
+</pre></div>
+
+<h3>Getting a more complex result</h3>
+
+<p>For a description on how to write a more complicated parser please refer to the corresponding play! Anorm section. The procedure is equivalent.</p>
+
+<h2>Handling Neo4j types</h2>
+
+<p>Todo</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Ace maintained by <a href="https://github.com/flatmap">flatmap</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
