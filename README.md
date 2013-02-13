@@ -1,12 +1,16 @@
-# Ace
+# Anorm for Cypher Embedded!
 
-Ace is a copy of play!s data access layer **Anorm**. Since Anorm uses plain SQL Ace uses plain Cypher to interact with the database. Anorm's API has been adapted to fit the needs of Neo4j developers. It now provides an API to parse and transform Neo4j execution results.
+The [play!](http://www.playframework.org/) framework includes a simple data access layer called [Anorm](http://www.playframework.org/documentation/2.0.4/ScalaAnorm). It uses plain SQL to interact with the database and provides an API to parse and transform the resulting datasets.
+Some libraries exist to transfer this concept to the world of [Neo4j](http://www.neo4j.org/). The [Neo4j Scala wrapper](https://github.com/FaKod/neo4j-scala/) has introduced basic Cypher query support and [AnormCypher](http://anormcypher.org/) provides a Anorm-like API purely for REST.
+
+However, if you want to use Neo4j embedded in your applications you will be in need of another library. **Ace** (i.e. **A**norm for **C**ypher **E**mbedded) closes this gap and provides a data access layer that uses plain Cypher to interact with the database. Ace (much like AnormCypher) is modeled after Anorm for play! and it's API will look extremly similar.
+If you have worked with Anorm before, you will find Ace very easy to understand and work with.
 
 ## Executing Cypher queries
 
-To start you need to learn how to execute Cypher queries.
+To start you need to learn how to execute simple Cypher queries.
 
-First, import `org.ace._`, and then simply use the `Cypher` object to create queries. You need a `GraphDatabaseService` to run a query:
+First, import `org.ace._`, and then simply use the `Cypher` object to create queries. You need to provide an implicit `GraphDatabaseService` to run a query:
 
 ```scala
 import org.ace._
@@ -16,9 +20,9 @@ Neo4j.withTx { implicit service =>
 } 
 ```
 
-The `execute()` method returns a Boolean value indicating whether the execution was successful.
+The `execute()` method returns a boolean value indicating whether the execution was successful.
 
-To execute an update, you can use `executeUpdate()`, which returns a tuple containing:
+To execute an update, you can use `executeUpdate()`, which returns a 5-tuple containing:
  1. The number of nodes created.
  2. The number of relationships created.
  3. The number of properties set.
@@ -59,7 +63,7 @@ Cypher(
 
 The first way to access the results of a select query is to use the Stream API.
 
-When you call `apply()` on any Cypher statement, you will receive a lazy `Stream` of `Row` instances, where each row can be seen as a dictionary:
+When you call `apply()` on any Cypher statement, you will receive a `Stream` of `Row` instances, where each row can be seen as a dictionary:
 
 ```scala
 // Create a Cypher query
@@ -161,16 +165,30 @@ val count: Long = Cypher("START n=node(*) return COUNT(n)").as(scalar[Long].sing
 
 ### Getting a single optional result
 
-Let's say you want to retrieve a value from a query that might return null. We'll use the singleOpt parser :
+Let's say you want to retrieve a value from a query that might return null. We'll use the singleOpt parser:
 
 ```scala
 val countryId: Option[Long] = Cypher("START n=node(*) WHERE n.type! = 'Country' AND n.country = 'France' RETURN ID(n)").as(scalar[Long].singleOpt)
 ```
 
-### Getting a more complex result
-
-For a description on how to write a more complicated parser please refer to the corresponding play! Anorm section. The procedure is equivalent.
-
 ## Handling Neo4j types
 
-Todo
+The following parsers will retrieve Neo4j nodes and relationships from a query:
+
+```scala
+val node: org.neo4j.graphdb.Node = Cypher("START n=node(0) RETURN n").as(node("n").single)
+val rels: org.neo4j.graphdb.Relationship = Cypher("START n=node(0) MATCH n-[r]->() RETURN r").as(relationship("r") *)
+```
+
+If you need to retrieve Cypher paths, you can use the `path` parser. It will result in a `Seq[org.neo4j.graphdb.PropertyContainer]` containing all nodes and relationships along the given path. These will usually emerge in alternate order.
+
+```scala
+val path: Seq[org.neo4j.graphdb.PropertyContainer] = Cypher("START n=node(0) MATCH p=n-[r]-m RETURN p").as(path("p") *)
+```
+
+# References
+
+ * [Anorm](http://www.playframework.org/documentation/2.0.4/ScalaAnorm) - simple SQL data access
+ * [AnormCypher](http://anormcypher.org/) - a Neo4j library purely for REST
+ * [Play!](http://www.playframework.org/) - a framework for web applications with Java & Scala
+ * [Neo4j](http://www.neo4j.org/) - an open-source, high-performance, enterprise-grade NOSQL graph database
