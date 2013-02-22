@@ -43,9 +43,9 @@ If you have worked with Anorm before, you will find Ace very easy to understand 
 
 <p>To start you need to learn how to execute simple Cypher queries.</p>
 
-<p>First, import <code>org.ace._</code>, and then simply use the <code>Cypher</code> object to create queries. You need to provide an implicit <code>GraphDatabaseService</code> to run a query:</p>
+<p>First, import <code>net.flatmap.ace._</code>, and then simply use the <code>Cypher</code> object to create queries. You need to provide an implicit <code>GraphDatabaseService</code> to run a query:</p>
 
-<div class="highlight"><pre><span class="k">import</span> <span class="nn">org.ace._</span>
+<div class="highlight"><pre><span class="k">import</span> <span class="nn">net.flatmap.ace._</span>
 
 <span class="nc">Neo4j</span><span class="o">.</span><span class="n">withTx</span> <span class="o">{</span> <span class="k">implicit</span> <span class="n">service</span> <span class="k">=&gt;</span>
   <span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) RETURN n"</span><span class="o">).</span><span class="n">execute</span><span class="o">()</span>    
@@ -166,7 +166,7 @@ If you have worked with Anorm before, you will find Ace very easy to understand 
 <blockquote>
 <p><strong>Note:</strong> This is really useful, since most queries in a web application will return similar data sets. For example, if you have defined a parser able to parse a <code>Country</code> from a result set, and another <code>Language</code> parser, you can then easily compose them to parse both Country and Language from a join query.</p>
 
-<p>First you need to <code>import org.ace.CypherParser._</code></p>
+<p>First you need to <code>import net.flatmap.ace.CypherParser._</code></p>
 </blockquote>
 
 <h3>Getting a single result</h3>
