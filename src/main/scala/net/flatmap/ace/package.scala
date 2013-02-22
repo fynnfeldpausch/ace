@@ -4,12 +4,14 @@
  * Use the Cypher object's apply method to start a Neo4j cypher query.
  *
  * {{{
- * import ace._
+ * import net.flatmap.ace._
  *
  * Cypher("START root=node(0) RETURN root")
  * }}}
  */
-package org
+package net.flatmap
+
+import scala.language.implicitConversions
 
 package object ace {
 

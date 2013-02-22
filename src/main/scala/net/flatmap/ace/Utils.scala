@@ -1,4 +1,6 @@
-package org.ace
+package net.flatmap.ace
+
+import scala.language.implicitConversions
 
 case class MayErr[+E, +A](e: Either[E, A]) {
 

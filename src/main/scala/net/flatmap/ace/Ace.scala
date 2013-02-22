@@ -1,7 +1,8 @@
-package org.ace
+package net.flatmap.ace
 
 import MayErr._
 import java.util.Date
+import scala.language.postfixOps
 
 abstract class CypherRequestError
 case class ColumnNotFound(columnName: String, possibilities: List[String]) extends CypherRequestError {

@@ -1,4 +1,4 @@
-package org.ace
+package net.flatmap.ace
 
 abstract class DbValue[+A] {
 

@@ -1,10 +1,11 @@
-package org.acetest
+package net.flatmap.acetest
 
-import org.ace._
-import org.ace.CypherParser._
+import net.flatmap.ace._
+import net.flatmap.ace.CypherParser._
 import org.scalatest.{path => stpath, _}
 import org.scalatest.matchers.ShouldMatchers
 import scala.collection.JavaConverters._
+import scala.language.postfixOps
 
 class AceSpec extends FlatSpec
   with BeforeAndAfterAll
@@ -253,7 +254,7 @@ class AceSpec extends FlatSpec
         RETURN collect(n.name?) AS names"""
       ).as(get[Seq[String]]("names").single)
     }
-    data should equal (Seq("John", "Sarah", "Maria", "Joe", "Steve"))
+    data.sorted should equal (Seq("John", "Sarah", "Maria", "Joe", "Steve").sorted)
   }
 
   it should "be able to parse a path" in {

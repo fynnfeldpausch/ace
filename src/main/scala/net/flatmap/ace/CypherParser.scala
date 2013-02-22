@@ -1,4 +1,4 @@
-package org.ace
+package net.flatmap.ace
 
 import CypherParser.ResultSet
 
@@ -16,9 +16,9 @@ object CypherParser {
     } yield result).fold(e => Error(e), a => Success(a))
   }
 
-  def flatten[T1, T2, R](implicit f: org.ace.TupleFlattener[(T1 ~ T2) => R]): ((T1 ~ T2) => R) = f.f
+  def flatten[T1, T2, R](implicit f: net.flatmap.ace.TupleFlattener[(T1 ~ T2) => R]): ((T1 ~ T2) => R) = f.f
 
-  def str(columnName: String): RowParser[String] = get[String](columnName)(implicitly[org.ace.Column[String]])
+  def str(columnName: String): RowParser[String] = get[String](columnName)(implicitly[net.flatmap.ace.Column[String]])
 
   def bool(columnName: String): RowParser[Boolean] = get[Boolean](columnName)(implicitly[Column[Boolean]])
 
@@ -34,7 +34,7 @@ object CypherParser {
 
   def path(columnName: String): RowParser[Seq[org.neo4j.graphdb.PropertyContainer]] = get[Seq[org.neo4j.graphdb.PropertyContainer]](columnName)(implicitly[Column[Seq[org.neo4j.graphdb.PropertyContainer]]])
 
-  def get[T](columnName: String)(implicit extractor: org.ace.Column[T]): RowParser[T] = RowParser { row =>
+  def get[T](columnName: String)(implicit extractor: net.flatmap.ace.Column[T]): RowParser[T] = RowParser { row =>
     import MayErr._
 
     (for {
