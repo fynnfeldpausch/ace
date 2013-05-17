@@ -1,4 +1,4 @@
-package net.flatmap.ace
+package org.neo4j.ace
 
 import MayErr._
 import java.util.Date

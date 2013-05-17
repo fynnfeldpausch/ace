@@ -1,4 +1,4 @@
-package net.flatmap.ace
+package org.neo4j.ace
 
 import scala.language.implicitConversions
 

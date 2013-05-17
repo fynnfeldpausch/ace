@@ -1,4 +1,4 @@
-package net.flatmap.acetest
+package org.neo4j.acetest
 
 import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.graphdb.factory.GraphDatabaseFactory

@@ -6,14 +6,16 @@ Some libraries exist to transfer this concept to the world of [Neo4j](http://www
 However, if you want to use Neo4j embedded in your applications you will be in need of another library. **Ace** (i.e. **A**norm for **C**ypher **E**mbedded) closes this gap and provides a data access layer that uses plain Cypher to interact with the database. Ace (much like AnormCypher) is modeled after Anorm for play! and it's API will look extremly similar.
 If you have worked with Anorm before, you will find Ace very easy to understand and work with.
 
+Current tests run with *Scala 2.10.1* and *Neo4j 1.9.RC-2*.
+
 ## Executing Cypher queries
 
 To start you need to learn how to execute simple Cypher queries.
 
-First, import `net.flatmap.ace._`, and then simply use the `Cypher` object to create queries. You need to provide an implicit `GraphDatabaseService` to run a query:
+First, import `org.neo4j.ace._`, and then simply use the `Cypher` object to create queries. You need to provide an implicit `GraphDatabaseService` to run a query:
 
 ```scala
-import net.flatmap.ace._
+import org.neo4j.ace._
 
 Neo4j.withTx { implicit service =>
   val result: Boolean = Cypher("START n=node(0) RETURN n").execute()    
@@ -141,7 +143,7 @@ You can use the parser API to create generic and reusable parsers that can parse
 
 > **Note:** This is really useful, since most queries in a web application will return similar data sets. For example, if you have defined a parser able to parse a `Country` from a result set, and another `Language` parser, you can then easily compose them to parse both Country and Language from a join query.
 >
-> First you need to `import net.flatmap.ace.CypherParser._`
+> First you need to `import org.neo4j.ace.CypherParser._`
 
 ### Getting a single result
 
@@ -188,7 +190,7 @@ val path: Seq[org.neo4j.graphdb.PropertyContainer] = Cypher("START n=node(0) MAT
 
 # References
 
- * [Anorm](http://www.playframework.org/documentation/2.0.4/ScalaAnorm) - simple SQL data access
+ * [Anorm](http://www.playframework.com/documentation/2.1.1/ScalaAnorm) - simple SQL data access
  * [AnormCypher](http://anormcypher.org/) - a Neo4j library purely for REST
  * [Play!](http://www.playframework.org/) - a framework for web applications with Java & Scala
  * [Neo4j](http://www.neo4j.org/) - an open-source, high-performance, enterprise-grade NOSQL graph database
