@@ -1,36 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Ace : " />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Ace by fynnfeldpausch</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Ace</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Ace</h1>
+        <p></p>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/flatmap/ace">View on GitHub</a>
+        <p class="view"><a href="https://github.com/fynnfeldpausch/ace">View the Project on GitHub <small>fynnfeldpausch/ace</small></a></p>
 
-          <h1 id="project_title">Ace</h1>
-          <h2 id="project_tagline"></h2>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/flatmap/ace/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/flatmap/ace/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+        <ul>
+          <li><a href="https://github.com/fynnfeldpausch/ace/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/fynnfeldpausch/ace/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/fynnfeldpausch/ace">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
         <h1>Anorm for Cypher Embedded!</h1>
 
 <p>The <a href="http://www.playframework.org/">play!</a> framework includes a simple data access layer called <a href="http://www.playframework.org/documentation/2.0.4/ScalaAnorm">Anorm</a>. It uses plain SQL to interact with the database and provides an API to parse and transform the resulting datasets.
@@ -39,13 +36,15 @@ Some libraries exist to transfer this concept to the world of <a href="http://ww
 <p>However, if you want to use Neo4j embedded in your applications you will be in need of another library. <strong>Ace</strong> (i.e. <strong>A</strong>norm for <strong>C</strong>ypher <strong>E</strong>mbedded) closes this gap and provides a data access layer that uses plain Cypher to interact with the database. Ace (much like AnormCypher) is modeled after Anorm for play! and it's API will look extremly similar.
 If you have worked with Anorm before, you will find Ace very easy to understand and work with.</p>
 
+<p>Current tests run with <em>Scala 2.10.1</em> and <em>Neo4j 1.9.RC-2</em>.</p>
+
 <h2>Executing Cypher queries</h2>
 
 <p>To start you need to learn how to execute simple Cypher queries.</p>
 
-<p>First, import <code>net.flatmap.ace._</code>, and then simply use the <code>Cypher</code> object to create queries. You need to provide an implicit <code>GraphDatabaseService</code> to run a query:</p>
+<p>First, import <code>org.neo4j.ace._</code>, and then simply use the <code>Cypher</code> object to create queries. You need to provide an implicit <code>GraphDatabaseService</code> to run a query:</p>
 
-<div class="highlight"><pre><span class="k">import</span> <span class="nn">net.flatmap.ace._</span>
+<div class="highlight"><pre><span class="k">import</span> <span class="nn">org.neo4j.ace._</span>
 
 <span class="nc">Neo4j</span><span class="o">.</span><span class="n">withTx</span> <span class="o">{</span> <span class="k">implicit</span> <span class="n">service</span> <span class="k">=&gt;</span>
   <span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="nc">Cypher</span><span class="o">(</span><span class="s">"START n=node(0) RETURN n"</span><span class="o">).</span><span class="n">execute</span><span class="o">()</span>    
@@ -166,7 +165,7 @@ If you have worked with Anorm before, you will find Ace very easy to understand 
 <blockquote>
 <p><strong>Note:</strong> This is really useful, since most queries in a web application will return similar data sets. For example, if you have defined a parser able to parse a <code>Country</code> from a result set, and another <code>Language</code> parser, you can then easily compose them to parse both Country and Language from a join query.</p>
 
-<p>First you need to <code>import net.flatmap.ace.CypherParser._</code></p>
+<p>First you need to <code>import org.neo4j.ace.CypherParser._</code></p>
 </blockquote>
 
 <h3>Getting a single result</h3>
@@ -210,7 +209,7 @@ If you have worked with Anorm before, you will find Ace very easy to understand 
 
 <ul>
 <li>
-<a href="http://www.playframework.org/documentation/2.0.4/ScalaAnorm">Anorm</a> - simple SQL data access</li>
+<a href="http://www.playframework.com/documentation/2.1.1/ScalaAnorm">Anorm</a> - simple SQL data access</li>
 <li>
 <a href="http://anormcypher.org/">AnormCypher</a> - a Neo4j library purely for REST</li>
 <li>
@@ -219,17 +218,12 @@ If you have worked with Anorm before, you will find Ace very easy to understand 
 <a href="http://www.neo4j.org/">Neo4j</a> - an open-source, high-performance, enterprise-grade NOSQL graph database</li>
 </ul>
       </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Ace maintained by <a href="https://github.com/flatmap">flatmap</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/fynnfeldpausch">fynnfeldpausch</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-
+    <script src="javascripts/scale.fix.js"></script>
     
-
   </body>
 </html>
